@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DoctorChat</string>
+    <string name="auth_failed">Invalid Login</string>
+</resources>
