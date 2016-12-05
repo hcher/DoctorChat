@@ -227,7 +227,6 @@ public class CreateAccountActivity extends AppCompatActivity {
         mUsernameMap.child(mScreenNameField.getText().toString()).child("Uid")
                 .setValue(firebaseUser.getUid());
 
-        Log.d("check ONESIGNAL ID", oneSignalId);
         mUsernameMap.child(mScreenNameField.getText().toString()).child("OneSignal ID").setValue(oneSignalId);
     }
 }

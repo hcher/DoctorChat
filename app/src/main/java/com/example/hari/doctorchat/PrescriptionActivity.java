@@ -70,7 +70,10 @@ public class PrescriptionActivity extends AppCompatActivity {
                         setContentView(R.layout.prescriptions);
                         mPresciptionsListView = (ListView) findViewById(R.id.list_view_prescriptions);
                         mAddPrescriptionButton = (Button) findViewById(R.id.add_prescription);
-                        setLayout(currentUserRole);
+
+                        if(currentUserRole.equals("patient"))
+                            mAddPrescriptionButton.setVisibility(View.INVISIBLE);
+
                         start();
                     }
 
@@ -92,15 +95,6 @@ public class PrescriptionActivity extends AppCompatActivity {
 
                     }
                 });
-    }
-
-    /**
-     * If the user is a patient, hide the button to add prescriptions
-     * @param currentUserRole, the role of the current user
-     */
-    public void setLayout(String currentUserRole){
-        if(currentUserRole.equals("patient"))
-            mAddPrescriptionButton.setVisibility(View.INVISIBLE);
     }
 
     /**
