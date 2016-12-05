@@ -201,6 +201,9 @@ public class CreateAccountActivity extends AppCompatActivity {
         return valid;
     }
 
+    /**
+     * Update the database with the new user's information.
+     */
     public void updateDatabase(){
         User user = new User(mScreenNameField.getText().toString(), role, Boolean.TRUE, null);
         FirebaseDatabase database = FirebaseDatabase.getInstance();
