@@ -7,19 +7,36 @@ import java.util.ArrayList;
  */
 
 public class User {
-    public String alias;
-    public String role;
-    public Boolean notification;
-    public ArrayList<String> chats;
+    private String alias;
+    private String role;
+    private Boolean notification;
+    private ArrayList<String> chats;
 
     public User(){
 
     }
+
     public User (String alias, String role, Boolean notification, ArrayList<String> chats){
         this.alias = alias;
         this.role = role;
         this.notification = notification;
         this.chats = chats;
+    }
+
+    public Boolean getNotification() {
+        return notification;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public ArrayList<String> getChats() {
+        return chats;
     }
 
 }

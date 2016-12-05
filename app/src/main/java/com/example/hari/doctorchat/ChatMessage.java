@@ -5,9 +5,9 @@ package com.example.hari.doctorchat;
  */
 
 public class ChatMessage {
-    public String author;
-    public String message;
-    public String time;
+    private String author;
+    private String message;
+    private String time;
 
     public ChatMessage(){
 
@@ -17,6 +17,18 @@ public class ChatMessage {
         this.author = author;
         this.message = message;
         this.time = time;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public String getTime() {
+        return time;
     }
 
 }

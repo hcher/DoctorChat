@@ -29,6 +29,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.onesignal.OneSignal;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,11 +41,14 @@ public class MainActivity extends AppCompatActivity {
     private EditText mUsernameField;
     private EditText mPasswordField;
 
+    /**
+     * set the content view and assign EditTexts and Buttons, then set up Firebase AuthState Listener
+     * @param savedInstanceState, the Bundle passed through
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.signin);
-
 
 
         mUsernameField = (EditText) findViewById(R.id.username);
@@ -72,14 +79,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d("signed in", "onAuthStateChanged:signed_in:" + user.getUid());
-                } else {
-                    // User is signed out
-                    Log.d("signed out", "onAuthStateChanged:signed_out");
-                }
-                // ...
             }
         };
     }
@@ -98,29 +97,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static final String TAG = "Debug";
-
+    /**
+     * First check that required fields are filled. Sign in the user if the credentials are correct
+     * otherwise display a toast saying "Invalid Login"
+     * @param email, the email that the user has provided in the sign in fields
+     * @param password the password that the user has provided in the sign in fields
+     */
     private void signIn(String email, String password) {
-        Log.d(TAG, "createAccount:" + email);
         if (!validateForm()) {
             return;
         }
-
-        //showProgressDialog();
-
-        // [START create_user_with_email]
-        Log.d(email,password);
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithEmail:failed", task.getException());
                             Toast.makeText(getApplicationContext(), R.string.auth_failed,
                                     Toast.LENGTH_SHORT).show();
                         }
@@ -131,13 +122,14 @@ public class MainActivity extends AppCompatActivity {
                             startActivity(intent);
 
                         }
-
-                        // ...
                     }
                 });
-        // [END create_user_with_email]
     }
 
+    /**
+     * Check to make sure all required fields are filled and alert the user if they are empty.
+     * @return whether all the required fields are filled.
+     */
     private boolean validateForm() {
         boolean valid = true;
 

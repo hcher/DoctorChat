@@ -36,42 +36,42 @@ public class PrescriptionActivity extends AppCompatActivity {
     private DatabaseReference mChats = database.getReference("chats");
     private DatabaseReference mChat;
     private DatabaseReference mUsers = database.getReference("users");
-    private DatabaseReference mUsernames = database.getReference("usernames");
-    private String currentUserRole;
     private String currentUserName;
-    private String chatName;
     private String medication;
     private String instructions;
-    private EditText mNewPresctiptionField;
-    private EditText mMessage;
     private FirebaseListAdapter<Prescription> mPresciptionAdapter;
     private ListView mPresciptionsListView;
     private Button mAddPrescriptionButton;
 
 
+    /**
+     * Initialize the DatabaseReference to the chat the prescriptions are for, and initialize
+     * the current user's role and alias.
+     * @param savedInstanceState, the Bundle passed through
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.prescriptions);
+
 
         final String chatKey = getIntent().getStringExtra(CHAT_KEY);
-        Log.d("chat key: ", chatKey);
-
-
-        mPresciptionsListView = (ListView) findViewById(R.id.list_view_prescriptions);
-
-        mAddPrescriptionButton = (Button) findViewById(R.id.add_prescription);
-
-
-        Log.d("key", chatKey);
         mChat = mChats.child(chatKey);
+
 
         mUsers.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("role")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
+                    /**
+                     * Get the user's role and set the layout based on it.
+                     * @param dataSnapshot, the data that is received from the database
+                     */
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        currentUserRole = dataSnapshot.getValue(String.class);
-                        setLayout();
+                        String currentUserRole = dataSnapshot.getValue(String.class);
+                        setContentView(R.layout.prescriptions);
+                        mPresciptionsListView = (ListView) findViewById(R.id.list_view_prescriptions);
+                        mAddPrescriptionButton = (Button) findViewById(R.id.add_prescription);
+                        setLayout(currentUserRole);
+                        start();
                     }
 
                     @Override
@@ -94,8 +94,19 @@ public class PrescriptionActivity extends AppCompatActivity {
                 });
     }
 
-    @Override
-    protected void onStart(){
+    /**
+     * If the user is a patient, hide the button to add prescriptions
+     * @param currentUserRole, the role of the current user
+     */
+    public void setLayout(String currentUserRole){
+        if(currentUserRole.equals("patient"))
+            mAddPrescriptionButton.setVisibility(View.INVISIBLE);
+    }
+
+    /**
+     * Assign the adapter and populate it based on the prescriptions in the chat that called this class.
+     */
+    public void start(){
         super.onStart();
 
         mPresciptionAdapter = new FirebaseListAdapter<Prescription>(this, Prescription.class,
@@ -103,29 +114,24 @@ public class PrescriptionActivity extends AppCompatActivity {
             @Override
             protected void populateView(View v, Prescription model, int position) {
                 TextView doctorTextView = (TextView) v.findViewById(R.id.doctor_text_view);
-                doctorTextView.setText(model.doctor);
+                doctorTextView.setText(model.getDoctor());
 
                 TextView medicationTextView = (TextView) v.findViewById(R.id.medication_text_view);
-                medicationTextView.setText(model.medication);
+                medicationTextView.setText(model.getMedication());
 
                 TextView instructionTextView = (TextView) v.findViewById(R.id.instruction_text_view);
-                instructionTextView.setText(model.instructions);
+                instructionTextView.setText(model.getInstructions());
             }
 
         };
-
-
-        //mChatListView.getId();
         mPresciptionsListView.setAdapter(mPresciptionAdapter);
-
-        Log.d("set", "SET");
     }
 
-    public void setLayout(){
-        if(currentUserRole.equals("patient"))
-            mAddPrescriptionButton.setVisibility(View.INVISIBLE);
-    }
 
+    /**
+     * When the new prescription button is pressed, ask which medication through an Alert Dialog.
+     * @param view
+     */
     public void newPrescription(View view){
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(PrescriptionActivity.this);
@@ -155,6 +161,9 @@ public class PrescriptionActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Ask what the instructions are for the medication through an Alert Dialog.
+     */
     public void setInstructions(){
 
         AlertDialog.Builder alertBuilder = new AlertDialog.Builder(PrescriptionActivity.this);
@@ -182,6 +191,9 @@ public class PrescriptionActivity extends AppCompatActivity {
         alertBuilder.show();
     }
 
+    /**
+     * Create a new prescription object based on the input and add it to the database.
+     */
     public void addPrescriptionToDatabase(){
         Prescription prescription = new Prescription(currentUserName, medication, instructions);
         mChat.child("prescriptions").push().setValue(prescription);

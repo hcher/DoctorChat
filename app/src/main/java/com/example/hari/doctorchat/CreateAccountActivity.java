@@ -1,17 +1,3 @@
-//package com.example.hari.doctorchat;
-//
-//import android.support.v7.app.AppCompatActivity;
-//import android.os.Bundle;
-//
-//public class MainActivity extends AppCompatActivity {
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_main);
-//    }
-//}
-
 package com.example.hari.doctorchat;
 
 import android.content.Intent;
@@ -33,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.onesignal.OneSignal;
 
 public class CreateAccountActivity extends AppCompatActivity {
 
@@ -44,13 +31,16 @@ public class CreateAccountActivity extends AppCompatActivity {
     private EditText mScreenNameField;
     private RadioGroup mRoleSelector;
     private String role;
+    private String oneSignalId;
 
+    /**
+     * Set the layout, assign EditTexts and the RadioGroup and check that the input is valid
+     * @param savedInstanceState, the Bundle passed through
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.createaccount);
-
-
 
         mUsernameField = (EditText) findViewById(R.id.username);
         mScreenNameField = (EditText) findViewById(R.id.screen_name);
@@ -92,18 +82,15 @@ public class CreateAccountActivity extends AppCompatActivity {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d("signed in", "onAuthStateChanged:signed_in:" + user.getUid());
-                } else {
-                    // User is signed out
-                    Log.d("signed out", "onAuthStateChanged:signed_out");
-                }
-                // ...
+
             }
         };
     }
 
+    /**
+     * Set the role based on the option selected by the user
+     * @param view
+     */
     public void onRadioButtonClicked(View view){
         if(view.getId() == R.id.patient) {
             if (((RadioButton) view).isChecked())
@@ -129,74 +116,56 @@ public class CreateAccountActivity extends AppCompatActivity {
         }
     }
 
-    private static final String TAG = "Debug";
+    /**
+     * create the account with the input the user has given. If successful, sign in the user and
+     * update the database with the user's information. Otherwise, display a Toast that creating
+     * the account failed.
+     * @param email, the email that has been provided by the user to create the account with.
+     * @param password, the password that has been provided by the user to create the account with.
+     */
     private void createAccount(final String email, final String password) {
-        Log.d(TAG, "createAccount:" + email);
-
-
-        //showProgressDialog();
-
-        // [START create_user_with_email]
-        Log.d(email,password);
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), R.string.auth_failed,
+                            Toast.makeText(getApplicationContext(), "Sorry. Please try again.",
                                     Toast.LENGTH_SHORT).show();
                         }
                         else{
                             Toast.makeText(getApplicationContext(), "Success",
                                     Toast.LENGTH_SHORT).show();
-
-
                             signIn(email, password);
                             updateDatabase();
                             Intent intent = new Intent(getApplicationContext(), UserActivity.class);
                             startActivity(intent);
                         }
-
-                        // [START_EXCLUDE]
-                        //hideProgressDialog();
-                        // [END_EXCLUDE]
                     }
                 });
-        // [END create_user_with_email]
     }
 
+    /**
+     * Sign in the user
+     * @param email, the email to sign in with.
+     * @param password, the password to sign in with.
+     */
     private void signIn(String email, String password) {
-        Log.d(TAG, "createAccount:" + email);
-        //showProgressDialog();
-
-        // [START create_user_with_email]
-        Log.d(email,password);
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithEmail:failed", task.getException());
                             Toast.makeText(getApplicationContext(), R.string.auth_failed,
                                     Toast.LENGTH_SHORT).show();
                         }
-                        else {
-                        }
                     }
                 });
-        // [END create_user_with_email]
     }
 
+    /**
+     * Check that required fields are all filled
+     * @return if all the required fields are all filled
+     */
     private boolean validateCreate() {
         boolean valid = true;
 
@@ -242,6 +211,15 @@ public class CreateAccountActivity extends AppCompatActivity {
         DatabaseReference mUsernameMap = database.getReference("usernames");
         mUsernameMap.child(mScreenNameField.getText().toString()).child("Uid")
                 .setValue(firebaseUser.getUid());
+
+        OneSignal.idsAvailable(new OneSignal.IdsAvailableHandler() {
+            @Override
+            public void idsAvailable(String userId, String registrationId) {
+                oneSignalId = userId;
+            }
+        });
+
+        mUsernameMap.child(mScreenNameField.getText().toString()).child("OneSignal ID").setValue(oneSignalId);
     }
 
 }

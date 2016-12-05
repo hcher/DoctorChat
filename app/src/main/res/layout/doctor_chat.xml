@@ -70,7 +70,7 @@
             android:layout_height="60dp"
             android:scaleType="fitXY"
             android:id="@+id/send_message"
-            android:onClick="newMessage"
+            android:onClick="sendMessage"
             android:src="@drawable/send_message" />
 
     </LinearLayout>

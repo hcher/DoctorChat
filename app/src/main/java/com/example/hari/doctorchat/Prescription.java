@@ -5,9 +5,9 @@ package com.example.hari.doctorchat;
  */
 
 public class Prescription {
-    public String doctor;
-    public String medication;
-    public String instructions;
+    private String doctor;
+    private String medication;
+    private String instructions;
 
     public Prescription(){
 
@@ -17,5 +17,17 @@ public class Prescription {
         this.doctor = doctor;
         this.medication = medication;
         this.instructions = instructions;
+    }
+
+    public String getInstructions() {
+        return instructions;
+    }
+
+    public String getDoctor() {
+        return doctor;
+    }
+
+    public String getMedication() {
+        return medication;
     }
 }
