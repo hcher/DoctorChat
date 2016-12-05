@@ -341,6 +341,18 @@ public class ChatActivity extends AppCompatActivity {
         ChatRoom chatRoom = new ChatRoom(chatName, getIntent().getStringExtra(CHAT_KEY), chatType);
         mUsers.child(newUserUid).child("chats").push().setValue(chatRoom);
 
+        removeOwnId();
+        for(String oneSignalId: oneSignalIds){
+            try {
+                String jsonString = "{'contents': {'en':'"+ chatName + " : " +
+                        newUserName + " was added" + "'}" +
+                        ", 'include_player_ids': [" + oneSignalId + "]}";
+                OneSignal.postNotification(new JSONObject(jsonString), null);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
         Toast.makeText(getApplicationContext(), "Successfully Added!",
                 Toast.LENGTH_SHORT).show();
 
