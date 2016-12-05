@@ -33,6 +33,7 @@ public class SettingsActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        OneSignal.startInit(this).init();
 
         mUsers.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("notification")
                 .addValueEventListener(new ValueEventListener() {
@@ -42,13 +43,7 @@ public class SettingsActivity extends AppCompatActivity {
                         toggle = (Switch) findViewById(R.id.notification_switch);
                         notification = dataSnapshot.getValue(Boolean.class);
                         toggle.setChecked(notification);
-
-                        if (notification){
-                            OneSignal.setSubscription(true);
-                        }
-                        else{
-                            OneSignal.setSubscription(false);
-                        }
+                        OneSignal.setSubscription(notification);
 
                         setOnClickListener();
                     }
@@ -69,15 +64,9 @@ public class SettingsActivity extends AppCompatActivity {
     public void setOnClickListener(){
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    OneSignal.setSubscription(true);
+                    OneSignal.setSubscription(isChecked);
                     mUsers.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                            .child("notification").setValue(true);
-                } else {
-                    OneSignal.setSubscription(false);
-                    mUsers.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                            .child("notification").setValue(false);
-                }
+                            .child("notification").setValue(isChecked);
             }
         });
     }

@@ -32,6 +32,7 @@ public class UserActivity extends AppCompatActivity{
     private DatabaseReference mChatRef = database.getReference("chats");
     private DatabaseReference mUsers = database.getReference("users");
     String currentUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private String key;
     private String oneSignalId;
     private String role;
     private EditText mNewRoom;
@@ -87,8 +88,7 @@ public class UserActivity extends AppCompatActivity{
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ChatRoom chatRoom =  mAdapter.getItem(position);
-                Intent intent;
-                intent = new Intent(getApplicationContext(), ChatActivity.class);
+                Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
                 intent.putExtra(ChatActivity.CHAT_KEY, chatRoom.getKey());
                 startActivity(intent);
             }
@@ -120,18 +120,29 @@ public class UserActivity extends AppCompatActivity{
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
 
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+        if (id == R.id.action_logout) {
+            mAuth.signOut();
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+
+        }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Override back button press going back to sign in screen
+     */
+    public void onBackPressed() {
     }
 
     /**
@@ -149,7 +160,7 @@ public class UserActivity extends AppCompatActivity{
         }
 
 
-        String key = mChatRef.push().getKey();
+        key = mChatRef.push().getKey();
         ChatRoom chatRoom = new ChatRoom(newName, key, role);
 
         mChatRef.child(key).child("Type").setValue(role);
@@ -159,10 +170,10 @@ public class UserActivity extends AppCompatActivity{
             @Override
             public void idsAvailable(String userId, String registrationId) {
                 oneSignalId = userId;
+                mChatRef.child(key).child("IDs").push().setValue(oneSignalId);
             }
         });
 
-        mChatRef.child(key).child("IDs").push().setValue(oneSignalId);
 
         mUsers.child(currentUid).child("chats").push().setValue(chatRoom);
         mNewRoom.setText("");

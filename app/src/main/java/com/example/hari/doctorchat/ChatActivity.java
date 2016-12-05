@@ -230,7 +230,9 @@ public class ChatActivity extends AppCompatActivity {
         removeOwnId();
         for(String oneSignalId: oneSignalIds){
             try {
-                String jsonString = "{'contents': {'en':'"+ currentUserName + ": " + newMessage +"'}, 'include_player_ids': [" + oneSignalId + "]}";
+                String jsonString = "{'contents': {'en':'"+ chatName + " : " +
+                        currentUserName + ": " + newMessage +"'}" +
+                        ", 'include_player_ids': [" + oneSignalId + "]}";
                 OneSignal.postNotification(new JSONObject(jsonString), null);
             } catch (JSONException e) {
                 e.printStackTrace();

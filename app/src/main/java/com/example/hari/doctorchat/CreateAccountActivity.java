@@ -40,13 +40,25 @@ public class CreateAccountActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.createaccount);
+        setContentView(R.layout.create_account);
 
         mUsernameField = (EditText) findViewById(R.id.username);
         mScreenNameField = (EditText) findViewById(R.id.screen_name);
         mPasswordField = (EditText) findViewById(R.id.password);
         mRetypePasswordField = (EditText) findViewById(R.id.retype_password);
         mRoleSelector = (RadioGroup) findViewById(R.id.select_role);
+
+        OneSignal.startInit(this).init();
+
+        OneSignal.idsAvailable(new OneSignal.IdsAvailableHandler() {
+            @Override
+            public void idsAvailable(String userId, String registrationId) {
+                oneSignalId = userId;
+                Log.d("assign oneSignal", oneSignalId);
+            }
+        });
+
+
 
         findViewById(R.id.create_account_button)
                 .setOnClickListener(new View.OnClickListener() {
@@ -215,15 +227,8 @@ public class CreateAccountActivity extends AppCompatActivity {
         mUsernameMap.child(mScreenNameField.getText().toString()).child("Uid")
                 .setValue(firebaseUser.getUid());
 
-        OneSignal.idsAvailable(new OneSignal.IdsAvailableHandler() {
-            @Override
-            public void idsAvailable(String userId, String registrationId) {
-                oneSignalId = userId;
-            }
-        });
-
+        Log.d("check ONESIGNAL ID", oneSignalId);
         mUsernameMap.child(mScreenNameField.getText().toString()).child("OneSignal ID").setValue(oneSignalId);
     }
-
 }
 
